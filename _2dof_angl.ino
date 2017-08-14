@@ -67,7 +67,7 @@ void sweep(int a1,int a2){
       }
     }
     angle(i,j);
-    _delay_ms(50);
+    _delay_ms(40);
   }
   a1o = a1;
   a2o = a2;
