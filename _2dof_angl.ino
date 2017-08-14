@@ -3,6 +3,7 @@
 #include<avr/interrupt.h>
 #include<math.h>
 
+
 int cnt=0,chkm=0,j;
 char a,c,ch;
 int i,k=0; 
@@ -10,47 +11,43 @@ int param[2]={0,0};
 int p;
 int flag=0; 
 float l1=10,l2=10; 
-int val_a,val_b;
-
-void angle(float a,float b)
-{
-  val_a=round(110+((420.0/180.0)*a));
-  val_b=round(110+((420.0/180.0)*b));
- 
-  OCR1A=val_a;
-  OCR1B=val_b;
-}
 
 void ik(int a,int b)
 {    
-  float A1=0,A2=0; 
+  float A1=0,A2=0,cA2,sA2; 
   float u=0,l=0,m=0,n=0; 
-  if(a==0||b==0)
-    flag=1;
-  else
+  if(a==0&&b==0)
+     flag=1;
+ else
   {    
-    u=(l2*l2)+(l1*l1)-(a*a)-(b*b);
+    u=-(l2*l2)-(l1*l1)+(a*a)+(b*b);
     l=(2*l1*l2);
-    A2= acos(u/l);
-       
+   // A2= acos(u/l);    //// it will always return + ve, cuz cos(-Q)=cos(Q)
+    cA2=(u/l);
+    sA2=sqrt(1-((u*u)/(l*l)));
+   //A2=atan2(sA2,cA2);
+    A2=atan2(sA2,cA2);
+               
     if(a==0)
       m=3.14/2;
     else
-      m=atan(b/a);
-      
-    n=atan((l2*sin(A2))/(l1+(l2*cos(A2))));   
+      m=atan2(b,a);
+
+                      
+    
+    n=atan2((l2*sin(A2)),(l1+(l2*cos(A2))));   
     A1= m-n;
-              
-    A1*=180/3.14;                  
-    A2*=180/3.14;                     
+    A2=A2*180/3.14;   
+    A1=A1*180/3.14;                  
+    
 
     A1=round(A1);
     A2=round(A2);
         
-    if(A1>180||A1<0||A2>180||A2<0)
-      flag=1;
-    
-  }
+   // if(A1>180||A1<0)
+     // flag=1;
+} 
+ 
   if(flag==1)  //// if coor values are inappropriate
     {
       char str[]="\n out of reach \n";
@@ -63,15 +60,14 @@ void ik(int a,int b)
     }
     
   else    //// if angle values are available
-    {    
-        angle(A1,A2);
-        
-        A1=A1/10;
-        UART_send((A1+'0'));
-        UART_send(' ');
-        A2=A2/10;
-        UART_send((A2+'0'));
-        UART_send(' ');                     
+    {  
+        UART_send((A1/10+'0'));
+        UART_send(((int)A1%10+'0'));
+        UART_send(',');
+        UART_send((A2/10+'0'));
+        UART_send(((int)A2%10+'0'));
+        UART_send(' ');   
+                          
     }
 }
 
@@ -120,21 +116,13 @@ void UART_send(char X)
   UCSR0A|=1<<UDRE0;
 }
 
-void timer_init()
-{
-  DDRB |=(1<<PB1)|(1<<PB2);
-  TCCR1A |= (1<<WGM11) |(1<<COM1A1)|( 1<<COM1B1);
-  TCCR1B |= (1<<WGM13) | (1<<WGM12) | (1<<CS11)|(1<<CS10);//Prescalar 64
-  ICR1=4999;
-}
 
 int main(void)
 {
   sei();
-  UART_init(); 
-  timer_init();
-   
-  angle(20,20);        
+  UART_init();   
+//  Serial.begin(9600);  
+//  Serial.begin(9600);     
   
   while (1)
   {
@@ -154,3 +142,4 @@ int main(void)
   return 0;
   
 } /// end of main
+
