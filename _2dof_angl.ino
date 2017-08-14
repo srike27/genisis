@@ -6,7 +6,7 @@
 
 int cnt=0,chkm=0,j;
 char a,c,ch;
-int i,k=0; 
+int i,k=0,a1o=0,a2o=0; 
 int param[2]={0,0}; 
 int p;
 int flag=0; 
@@ -16,12 +16,63 @@ int val_a,val_b;
 
 void angle(float a,float b)
 {
-  val_a=round(110+((420.0/180.0)*a));
-  val_b=round(110+((420.0/180.0)*b));
- 
+  val_a=round((110+((422.0/180.0)*a))*(76.0/90.0)*(32.0/30.0));//PLEASE NOTE THE CORRECTION FACTORS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  val_b=round(110+((425.0/180.0)*b)*(75.0/90.0));
   OCR1A=val_a;
   OCR1B=val_b;
 }
+void sweep(int a1,int a2){
+  int rot1,rot2;
+  if(a1o>a1){
+    rot1=0;
+  }
+  else rot1=1;
+  if(a2o>a2){
+    rot2=0;
+  }
+  else rot2=1;
+  i=a1o;
+  j=a2o;
+  while(!((i==a1)&&(j==a2))){
+    if(rot1==0&&rot2==0){
+      if(i>a1){
+        i--;
+      }
+      if(j>a2){
+        j--;
+      }
+    }
+    if(rot1==0&&rot2==1){
+      if(i>a1){
+        i--;
+      }
+      if(j<a2){
+        j++;
+      }
+    }
+    if(rot1==1&&rot2==0){
+      if(i<a1){
+        i++;
+      }
+      if(j>a2){
+        j--;
+      }
+    }
+    if(rot1==1&&rot2==1){
+      if(i<a1){
+        i++;
+      }
+      if(j<a2){
+        j++;
+      }
+    }
+    angle(i,j);
+    _delay_ms(50);
+  }
+  a1o = a1;
+  a2o = a2;
+}
+
 
 void ik(int a,int b)
 {    
@@ -72,7 +123,7 @@ void ik(int a,int b)
     
   else    //// if angle values are available
     {  
-        angle(A1,A2);
+        sweep(A1,A2);
         UART_send((A1/10+'0'));
         UART_send(((int)A1%10+'0'));
         UART_send(',');
@@ -162,3 +213,4 @@ int main(void)
   return 0;
   
 } /// end of main
+
